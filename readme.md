@@ -19,7 +19,9 @@ https://youtu.be/FYh58sWFABA
 
 Performance Verification with existing mosquitto v1.4.15
 
-https://youtu.be/bTzUoN61QBw If you want to see the results right away, watch 02:40
+https://youtu.be/bTzUoN61QBw 
+
+If you want to see the results right away, watch 02:40
 
 ### Build Dependencies
 
