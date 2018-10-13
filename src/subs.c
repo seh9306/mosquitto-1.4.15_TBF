@@ -122,8 +122,12 @@ static int _subs_process(struct mosquitto_db *db, struct _mosquitto_subhier *hie
 		}
 	}
 	while(source_id && leaf){
-		//printf("%d %d %d %d!!\n",getTickCount(), leaf->time, leaf->time_filter, (leaf->context->is_bridge && !strcmp(leaf->context->id, source_id)));
 		if((tmp_time = getTickCount()) - leaf->time < leaf->time_filter*10 || !leaf->context->id || (leaf->context->is_bridge && !strcmp(leaf->context->id, source_id))){
+			/*      non normative comment about TBF 
+			(tmp_time = getTickCount()) - leaf->time < leaf->time_filter*10
+			If the value of getTickCount () minus the last message insertion time is not 
+			greater than the filter value, no message is inserted and Move to the next leaf. 
+			*/
 			leaf = leaf->next;
 			continue;
 		}
@@ -477,7 +481,6 @@ int mqtt3_sub_add(struct mosquitto_db *db, struct mosquitto *context, const char
 		subhier = subhier->next;
 	}
 	if(!subhier){
-		//printf("언제 실행되니?\n");
 		child = _mosquitto_malloc(sizeof(struct _mosquitto_subhier));
 		if(!child){
 			_sub_topic_tokens_free(tokens);
@@ -553,12 +556,6 @@ int mqtt3_db_messages_queue(struct mosquitto_db *db, const char *source_id, cons
 	mqtt3_db_message_write(), which could remove the message if ref_count==0.
 	*/
 	(*stored)->ref_count++;
-	/*printf("#3 ");
-	if (!(*stored))
-		printf("stored (NULL) ,");
-	else
-		printf("reference count : %d, ", (*stored)->ref_count);
-	printf("db msg store count %d\n", db->msg_store_count);*/
 
 	subhier = db->subs.children;
 	while(subhier){
@@ -574,20 +571,7 @@ int mqtt3_db_messages_queue(struct mosquitto_db *db, const char *source_id, cons
 		subhier = subhier->next;
 	}
 	_sub_topic_tokens_free(tokens);
-	/*printf("#4 ");
-	if (!(*stored))
-		printf("stored (NULL) ,");
-	else
-		printf("reference count : %d, ", (*stored)->ref_count);
-	printf("db msg store count %d\n", db->msg_store_count);*/
-	/* Remove our reference and free if needed. */
-	mosquitto__db_msg_store_deref(db, stored);
-	/*printf("#5 ");
-	if (!(*stored))
-		printf("stored (NULL) ,");
-	else
-		printf("reference count : %d, ", (*stored)->ref_count);
-	printf("db msg store count %d\n", db->msg_store_count);*/
+
 	return rc;
 }
 

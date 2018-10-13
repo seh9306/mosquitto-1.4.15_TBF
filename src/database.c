@@ -200,10 +200,9 @@ static void _message_remove(struct mosquitto_db *db, struct mosquitto *context, 
 	int i;
 	struct mosquitto_client_msg *tail;
 
-	if(!context || !msg || !(*msg)){
+	if (!context || !msg || !(*msg)) {
 		return;
 	}
-	//printf("#11 db msg count : %d\n", db->msg_store_count);
 	if((*msg)->store){
 		mosquitto__db_msg_store_deref(db, &(*msg)->store);
 	}
@@ -230,7 +229,7 @@ static void _message_remove(struct mosquitto_db *db, struct mosquitto *context, 
 	}
 	tail = context->msgs;
 	i = 0;
-	//printf("#12 db msg count : %d\n", db->msg_store_count);
+
 	while(tail && tail->state == mosq_ms_queued && i<max_inflight){
 		if(tail->direction == mosq_md_out){
 			switch(tail->qos){
@@ -252,7 +251,7 @@ static void _message_remove(struct mosquitto_db *db, struct mosquitto *context, 
 
 		tail = tail->next;
 	}
-	//printf("#13 db msg count : %d\n", db->msg_store_count);
+
 }
 
 int mqtt3_db_message_delete(struct mosquitto_db *db, struct mosquitto *context, uint16_t mid, enum mosquitto_msg_direction dir)
@@ -288,7 +287,7 @@ int mqtt3_db_message_delete(struct mosquitto_db *db, struct mosquitto *context, 
 		}
 		if(tail->mid == mid && tail->direction == dir){
 			msg_index--;
-			//printf("메시지가 삭제되었습니다.\n");
+
 			_message_remove(db, context, &tail, last);
 			deleted = true;
 		}else{
@@ -789,11 +788,8 @@ int mqtt3_db_message_release(struct mosquitto_db *db, struct mosquitto *context,
 			 * denied/dropped and is being processed so the client doesn't
 			 * keep resending it. That means we don't send it to other
 			 * clients. */
-			//printf("#3 db msg count : %d\n", db->msg_store_count);
 			if(!topic || !mqtt3_db_messages_queue(db, source_id, topic, qos, retain, &tail->store)){
-				//printf("#4 db msg count : %d\n", db->msg_store_count);
 				_message_remove(db, context, &tail, last);
-				//printf("#5 db msg count : %d\n", db->msg_store_count);
 				deleted = true;
 			}else{
 				return 1;
@@ -850,7 +846,6 @@ int mqtt3_db_message_write(struct mosquitto_db *db, struct mosquitto *context)
 			payload = tail->store->payload;
 			switch(tail->state){
 				case mosq_ms_publish_qos0:
-					//printf("qos 0!\n");
 					rc = _mosquitto_send_publish(context, mid, topic, payloadlen, payload, qos, retain, retries);
 					if(!rc){
 						_message_remove(db, context, &tail, last);
@@ -860,7 +855,6 @@ int mqtt3_db_message_write(struct mosquitto_db *db, struct mosquitto *context)
 					break;
 
 				case mosq_ms_publish_qos1:
-					//printf("qos 1!\n");
 					rc = _mosquitto_send_publish(context, mid, topic, payloadlen, payload, qos, retain, retries);
 					if(!rc){
 						tail->timestamp = mosquitto_time();
@@ -874,7 +868,6 @@ int mqtt3_db_message_write(struct mosquitto_db *db, struct mosquitto *context)
 					break;
 
 				case mosq_ms_publish_qos2:
-					//printf("qos 2!\n");
 					rc = _mosquitto_send_publish(context, mid, topic, payloadlen, payload, qos, retain, retries);
 					if(!rc){
 						tail->timestamp = mosquitto_time();

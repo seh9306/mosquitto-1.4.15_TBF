@@ -93,7 +93,6 @@ void my_connect_callback(struct mosquitto *mosq, void *obj, int result)
 
 	if(!result){
 		for(i=0; i<cfg->topic_count; i++){
-			//printf("time_filter : %d\n",cfg->time_filter);
 			mosquitto_subscribe(mosq, NULL, cfg->topics[i], cfg->qos, cfg->time_filter);
 		}
 	}else{

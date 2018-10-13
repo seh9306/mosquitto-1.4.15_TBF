@@ -851,11 +851,9 @@ int client_connect(struct mosquitto *mosq, struct mosq_config *cfg)
 
 #ifdef WITH_SRV
 	if (cfg->use_srv) {
-		//printf("srv인가?\n");///=
 		rc = mosquitto_connect_srv(mosq, cfg->host, cfg->keepalive, cfg->bind_address);
 	}
-	else {////////일반적으로 여기로 들어감
-		  //printf("아니네\n"); ///=
+	else {
 		rc = mosquitto_connect_bind(mosq, cfg->host, cfg->port, cfg->keepalive, cfg->bind_address);
 	}
 #else

@@ -215,7 +215,6 @@ int mqtt3_handle_publish(struct mosquitto_db *db, struct mosquitto *context)
 	}
 
 	_mosquitto_log_printf(NULL, MOSQ_LOG_DEBUG, "Received PUBLISH from %s (d%d, q%d, r%d, m%d, '%s', ... (%ld bytes))", context->id, dup, qos, retain, mid, topic, (long)payloadlen);
-	//printf("context msg_count %d", context->msg_count);
 	if(qos > 0){
 		mqtt3_db_message_store_find(context, mid, &stored);
 	}
@@ -226,7 +225,6 @@ int mqtt3_handle_publish(struct mosquitto_db *db, struct mosquitto *context)
 			if(payload) _mosquitto_free(payload);
 			return 1;
 		}
-		//printf("#1 reference count : %d, (%s) context msg count : %d, db msg store count %d\n", stored->ref_count, context->id, context->msg_count, db->msg_store_count);
 	}else{
 		dup = 1;
 	}
@@ -234,16 +232,6 @@ int mqtt3_handle_publish(struct mosquitto_db *db, struct mosquitto *context)
 	switch(qos){
 		case 0:
 			if(mqtt3_db_messages_queue(db, context->id, topic, qos, retain, &stored)) rc = 1;
-			/*printf("#2 ");
-			if (!stored)
-				printf("stored (NULL) ,");
-			else
-				printf("reference count : %d, ", stored->ref_count);
-			if (!context) 
-				printf("context (NULL) ,");
-			else
-				printf("(%s) context msg count : %d, ", context->id, context->msg_count);
-			printf("db msg store count %d\n", db->msg_store_count);*/
 			break;
 		case 1:
 			if(mqtt3_db_messages_queue(db, context->id, topic, qos, retain, &stored)) rc = 1;
@@ -255,16 +243,6 @@ int mqtt3_handle_publish(struct mosquitto_db *db, struct mosquitto *context)
 			}else{
 				res = 0;
 			}
-			/*printf("#qos2-1 ");
-			if (!stored)
-				printf("stored (NULL) ,");
-			else
-				printf("reference count : %d, ", stored->ref_count);
-			if (!context)
-				printf("context (NULL) ,");
-			else
-				printf("(%s) context msg count : %d, ", context->id, context->msg_count);
-			printf("db msg store count %d\n", db->msg_store_count);*/
 			/* mqtt3_db_message_insert() returns 2 to indicate dropped message
 			 * due to queue. This isn't an error so don't disconnect them. */
 			if(!res){
@@ -272,21 +250,10 @@ int mqtt3_handle_publish(struct mosquitto_db *db, struct mosquitto *context)
 			}else if(res == 1){
 				rc = 1;
 			}
-			/*printf("#qos2-2 ");
-			if (!stored)
-				printf("stored (NULL) ,");
-			else
-				printf("reference count : %d, ", stored->ref_count);
-			if (!context)
-				printf("context (NULL) ,");
-			else
-				printf("(%s) context msg count : %d, ", context->id, context->msg_count);
-			printf("db msg store count %d\n", db->msg_store_count);*/
 			break;
 	}
 	_mosquitto_free(topic);
 	if(payload) _mosquitto_free(payload);
-	//printf("db msg store count %d\n", db->msg_store_count);
 	return rc;
 process_bad_message:
 	_mosquitto_free(topic);
